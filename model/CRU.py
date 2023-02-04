@@ -1,14 +1,7 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Thu Sep 23 14:01:25 2021
-
-@author: SIM
-"""
-
 import torch 
 import torch.nn as nn
 from torch.autograd import Variable
-import CRUCell 
+import model.CRUCell 
 
 import pandas as pd
 import numpy as np
