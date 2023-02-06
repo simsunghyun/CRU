@@ -28,13 +28,18 @@ class _CRU(nn.Module):
             nn.ELU()
             )
 
+        if torch.cuda.is_available():
+            self.device = torch.device('cuda')
+        else:
+            self.device = torch.device('cpu')
+            
 
     def forward(self, input, hid_state=None):
 
         if hid_state is None:
             hid_state = Variable(torch.zeros(self.num_layers, 3, input.size(0), self.hid_dim)).cuda()
         else:
-            hid_state = hid_state.cuda()
+            hid_state = hid_state.to_device(self.device)
 
         outs = []
 
@@ -47,9 +52,9 @@ class _CRU(nn.Module):
             for layer in range(self.num_layers):
 
                 if layer == 0:
-                    hid_layer = self.cell_list[layer](input[:, t, :], hidden[layer]).cuda()
+                    hid_layer = self.cell_list[layer](input[:, t, :], hidden[layer]).to_device(self.device)
                 else:
-                    hid_layer = self.cell_list[layer](hidden[layer - 1],hidden[layer]).cuda()
+                    hid_layer = self.cell_list[layer](hidden[layer - 1],hidden[layer]).to_device(self.device)
                 
                 hidden[layer] = hid_layer
 
