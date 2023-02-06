@@ -27,24 +27,30 @@ class _CRUCell(nn.Module):
         
         self.reset_parameters()
 
+        if torch.cuda.is_available():
+            self.device = torch.device('cuda')
+        else:
+            self.device = torch.device('cpu')
+            
+            
     def forward(self, x, hid_state = None):
         
         lamda = 0.5
         x_t, x_s, x_r = self.ts_decompose(x)
         
         if hid_state is None:
-            hid_state = Variable(3, x.size(1), self.hid_dim).cuda()
+            hid_state = Variable(3, x.size(1), self.hid_dim).to_device(device)
         else:
             hid_state.cuda()
         
         with torch.no_grad():
             
-            x_t = self.wx_t(x_t).cuda()
-            x_s = self.wx_s(x_s).cuda()
-            x_r = self.wx_r(x_r).cuda()
+            x_t = self.wx_t(x_t).to_device(self.device)
+            x_s = self.wx_s(x_s).to_device(self.device)
+            x_r = self.wx_r(x_r).to_device(self.device)
             
-            h_t = self.wh_t(hid_state[0,:,:]).cuda()
-            h_s = self.wh_s(hid_state[1,:,:]).cuda()
+            h_t = self.wh_t(hid_state[0,:,:]).to_device(self.device)
+            h_s = self.wh_s(hid_state[1,:,:]).to_device(self.device)
             
         x_autocor_t, x_cor_t, x_new_t = (x_t).chunk(3,1)
         x_autocor_s, x_cor_s, x_new_s = (x_s).chunk(3,1)
@@ -89,8 +95,8 @@ class _CRUCell(nn.Module):
             seasonal.append(res.seasonal.values)
             resid.append(res.resid.values)
         
-        trend = torch.FloatTensor(trend).permute(1,0).cuda()
-        seasonal = torch.FloatTensor(seasonal).permute(1,0).cuda()
-        resid = torch.FloatTensor(resid).permute(1,0).cuda()
+        trend = torch.FloatTensor(trend).permute(1,0).to_device(self.device)
+        seasonal = torch.FloatTensor(seasonal).permute(1,0).to_device(self.device)
+        resid = torch.FloatTensor(resid).permute(1,0).to_device(self.device)
         
         return trend, seasonal, resid
