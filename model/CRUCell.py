@@ -9,13 +9,12 @@ import numpy as np
 
 class _CRUCell(nn.Module):
     
-    def __init__(self, in_dim, hid_dim, lamda = 0.5, bias=True):
+    def __init__(self, in_dim, hid_dim, bias=True):
         super(_CRUCell, self).__init__()
         
         self.in_dim = in_dim
         self.hid_dim = hid_dim
         self.bias = bias
-        self.lamda = lamda
         
         self.wx_t = nn.Linear(self.in_dim, self.hid_dim*3, bias = self.bias)
         self.wx_s = nn.Linear(self.in_dim, self.hid_dim*3, bias = self.bias)
@@ -30,22 +29,22 @@ class _CRUCell(nn.Module):
 
     def forward(self, x, hid_state = None):
         
+        lamda = 0.5
         x_t, x_s, x_r = self.ts_decompose(x)
         
         if hid_state is None:
             hid_state = Variable(3, x.size(1), self.hid_dim).cuda()
         else:
-            hid_state
+            hid_state.cuda()
         
         with torch.no_grad():
             
-            x_t = self.wx_t(x_t)
-            x_s = self.wx_s(x_s)
-            x_r = self.wx_r(x_r)
+            x_t = self.wx_t(x_t).cuda()
+            x_s = self.wx_s(x_s).cuda()
+            x_r = self.wx_r(x_r).cuda()
             
-            h_t = self.wh_t(hid_state[0,:,:])
-            h_s = self.wh_s(hid_state[1,:,:])
-            #h_r = self.wh_r(hid_state[2,:,:])
+            h_t = self.wh_t(hid_state[0,:,:]).cuda()
+            h_s = self.wh_s(hid_state[1,:,:]).cuda()
             
         x_autocor_t, x_cor_t, x_new_t = (x_t).chunk(3,1)
         x_autocor_s, x_cor_s, x_new_s = (x_s).chunk(3,1)
