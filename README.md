@@ -1,4 +1,4 @@
-# CRU
+# Correlation Recurrent Units
 This is a PyTorch implementation of the Correlation Recurrent Units (CRU) in "CRU: A Novel Neural Architecture for Improving the Predictive Performance of Time-Series Data" (Sunghyun Sim, Dohee Kim, Hyerim Bae, arxiv, 2022).
 
 The CRU is a new layer specialized in predicting time series data and consists of the following figure.
