@@ -1,11 +1,7 @@
 import torch 
 import torch.nn as nn
 from torch.autograd import Variable
-import model.CRUCell 
-
-import pandas as pd
-import numpy as np
-
+import model.CRUCell as CRUCell
 
 class _CRU(nn.Module):
     
@@ -17,11 +13,10 @@ class _CRU(nn.Module):
         self.num_layers = num_layers
         self.bias = bias
         self.out_dim = out_dim
-
+        
         self.cell_list = nn.ModuleList()
-
         self.cell_list.append(CRUCell._CRUCell(self.in_dim,
-                                               self.hid_dim,
+                                               self.hid_dim, 
                                                self.bias))
         for l in range(1, self.num_layers):
             self.cell_list.append(CRUCell._CRUCell(self.hid_dim,
@@ -52,9 +47,9 @@ class _CRU(nn.Module):
             for layer in range(self.num_layers):
 
                 if layer == 0:
-                    hid_layer = self.cell_list[layer](input[:, t, :], hidden[layer])
+                    hid_layer = self.cell_list[layer](input[:, t, :], hidden[layer]).cuda()
                 else:
-                    hid_layer = self.cell_list[layer](hidden[layer - 1],hidden[layer])
+                    hid_layer = self.cell_list[layer](hidden[layer - 1],hidden[layer]).cuda()
                 
                 hidden[layer] = hid_layer
 
