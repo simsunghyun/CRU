@@ -16,9 +16,14 @@ class ModelTrain():
         pre = Preprocessing._Preprocessing(data_name, data_type, time_window, forecasting_term)
         self.trainX, self.trainY, self.testX, self.testY, self.scaler = pre.preprocessing()
 
+        if torch.cuda.is_available():
+            self.device = torch.device('cuda')
+        else:
+            self.device = torch.device('cpu')
+                    
     def _fit(self, hid_dim, out_dim, num_layers, epoch):
         
-        m = cru._CRU(self.in_dim, hid_dim, out_dim, num_layers).cuda()
+        m = cru._CRU(self.in_dim, hid_dim, out_dim, num_layers).to_device(self.device)
         crit = nn.MSELoss()
         para = list(m.parameters())
         optimizer = optim.Adam(para, 0.0001)
