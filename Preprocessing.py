@@ -1,5 +1,6 @@
 import pandas as pd
 import torch
+import numpy as np
 from sklearn.preprocessing import MinMaxScaler
 
 class _Preprocessing():
@@ -11,7 +12,7 @@ class _Preprocessing():
         # forecasting_term = forecasting point (ex. 1-step ahead, 3-step ahead)
         # train_ratio = train / test ratio  
         
-        self.dt = pd.read_csv('data/' + data_name).iloc[:,1:].astype('float')
+        self.dt = pd.read_csv('data/' + data_name,usecols=[1]).iloc[:8000,:].clip(lower=0).astype('float')
         self.data_type = data_type 
         self.time_window = time_window
         self.forecasting_term = forecasting_term
@@ -46,11 +47,11 @@ class _Preprocessing():
             testX.append(test.iloc[(i-self.time_window):i,:].values)
             testY.append(test.iloc[i+self.forecasting_term,:].values)
             
-        trainX = torch.FloatTensor(trainX).cuda()
-        trainY = torch.FloatTensor(trainY).cuda()
+        trainX = torch.FloatTensor(trainX).cpu()
+        trainY = torch.FloatTensor(trainY).cpu()
         
-        testX = torch.FloatTensor(testX).cuda()
-        testY = torch.FloatTensor(testY).cuda()
+        testX = torch.FloatTensor(testX).cpu()
+        testY = torch.FloatTensor(testY).cpu()
         
         return trainX, trainY, testX, testY, self.scaler
         

@@ -23,7 +23,7 @@ class ModelTrain():
                     
     def _fit(self, hid_dim, out_dim, num_layers, epoch):
         
-        m = cru._CRU(self.in_dim, hid_dim, out_dim, num_layers).to_device(self.device)
+        m = cru._CRU(self.in_dim, hid_dim, out_dim, num_layers).to(self.device)
         crit = nn.MSELoss()
         para = list(m.parameters())
         optimizer = optim.Adam(para, 0.0001)
@@ -35,24 +35,19 @@ class ModelTrain():
             loss.backward()
             optimizer.step()
         
-            if (e+1) % 100 == 0:
-                with torch.no_grad():
-                    pred,_ = m(self.testX)
-                    pred = pred.cpu().detach().numpy()
-                    real = self.testY.cpu().numpy().reshape(-1,1)
-                    for i in range(len(self.scaler)):
-                        pred[i,:] = self.scaler[i].inverse_transform(pred[i,:].reshape(-1,1))
-                        real[i,:] = self.scaler[i].inverse_transform(real[i,:].reshape(-1,1))
+            # if (e+1) % 2 == 0:
+            with torch.no_grad():
+                pred,_ = m(self.testX)
+                pred = pred.cpu().detach().numpy()
+                real = self.testY.cpu().numpy().reshape(-1,1)
+                for i in range(len(self.scaler)):
+                    pred[i,:] = self.scaler[i].inverse_transform(pred[i,:].reshape(-1,1))
+                    real[i,:] = self.scaler[i].inverse_transform(real[i,:].reshape(-1,1))
                         
-                    test_mape = np.mean(abs((np.array(pred)-np.array(real))/np.array(pred)))*100
-                    test_rmse = mse(pred, real)**0.5
+                test_mape = np.mean(abs((np.array(pred)-np.array(real))/np.array(pred)))*100
+                test_rmse = mse(pred, real)**0.5
                 
-                print('[Epoch: {}/{}] [Train Loss: {}] [Test RMSE: {}] [Test MAPE: {}]'.format(
+            print('[Epoch: {}/{}] [Train Loss: {}] [Test RMSE: {}] [Test MAPE: {}]'.format(
                     e+1, epoch, str(loss.item())[:6], str(test_rmse)[:6], str(test_mape)[:6]))
         
         return m
-                        
-                        
-                        
-                        
-                    
